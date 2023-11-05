@@ -3,7 +3,14 @@ import java.io.PrintWriter;
 import java.util.Locale;
 import java.util.Scanner;
 
-public class App {
+/**
+ * Main class to run the code.
+ */
+public class Main {
+    /**
+     * Main method to run the code.
+     * @param args Command line arguments (input file, output file)
+     */
     public static void main(String[] args) throws Exception {
         File inputFile = new File(args[0]);
         Scanner scanner = new Scanner(inputFile);
