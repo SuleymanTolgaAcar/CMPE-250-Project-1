@@ -1,6 +1,6 @@
-import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
 
@@ -11,9 +11,9 @@ import java.util.Locale;
  */
 public class Tree {
     public Node root;
-    public PrintWriter writer;
+    public FileWriter writer;
 
-    public Tree(Node root, PrintWriter writer) {
+    public Tree(Node root, FileWriter writer) {
         this.root = root;
         this.writer = writer;
     }
@@ -25,7 +25,7 @@ public class Tree {
      * @param value
      * @return the new node
      */
-    public Node insert(String name, double value) {
+    public Node insert(String name, double value) throws IOException {
         return insert(root, name, value);
     }
 
@@ -38,12 +38,12 @@ public class Tree {
      * @param value
      * @return the new node
      */
-    private Node insert(Node node, String name, double value) {
+    private Node insert(Node node, String name, double value) throws IOException {
         if (node == null) {
             return new Node(name, value);
         }
 
-        writer.println(node.name + " welcomed " + name);
+        writer.write(node.name + " welcomed " + name + "\n");
 
         if (value < node.value) {
             node.left = insert(node.left, name, value);
@@ -73,7 +73,7 @@ public class Tree {
      * @param value
      * @return the removed node
      */
-    public Node remove(double value) {
+    public Node remove(double value) throws IOException {
         return remove(root, value, false);
     }
 
@@ -89,7 +89,7 @@ public class Tree {
      * @param removed
      * @return
      */
-    private Node remove(Node node, double value, boolean removed) {
+    private Node remove(Node node, double value, boolean removed) throws IOException {
         if (node == null) {
             return null;
         }
@@ -100,18 +100,18 @@ public class Tree {
             node.right = remove(node.right, value, removed);
         } else {
             if (node.left == null && node.right == null) {
-                if (!removed) writer.println(node.name + " left the family, replaced by nobody");
+                if (!removed) writer.write(node.name + " left the family, replaced by nobody" + "\n");
                 return null;
             } else if (node.left == null) {
-                if (!removed) writer.println(node.name + " left the family, replaced by " + node.right.name);
+                if (!removed) writer.write(node.name + " left the family, replaced by " + node.right.name + "\n");
                 return node.right;
             } else if (node.right == null) {
-                if (!removed) writer.println(node.name + " left the family, replaced by " + node.left.name);
+                if (!removed) writer.write(node.name + " left the family, replaced by " + node.left.name + "\n");
                 return node.left;
             }
 
             Node min = findMin(node.right);
-            writer.println(node.name + " left the family, replaced by " + min.name);
+            writer.write(node.name + " left the family, replaced by " + min.name + "\n");
             node.name = min.name;
             node.value = min.value;
             node.right = remove(node.right, min.value, true);
@@ -259,7 +259,7 @@ public class Tree {
      * If the value is found, print the nodes from the last level.
      * @param value
      */
-    public void nodesWithSameRank(double value) {
+    public void nodesWithSameRank(double value) throws IOException {
         LinkedList<Node> queue = new LinkedList<Node>();
         ArrayList<Node> nodes = new ArrayList<Node>();
 
@@ -278,11 +278,11 @@ public class Tree {
             if(found) break;
         }
 
-        writer.print("Rank Analysis Result:");
+        writer.write("Rank Analysis Result:");
         for(Node n : nodes) {
-            writer.print(" " + n.name + " " + String.format(Locale.US, "%.3f", n.value));
+            writer.write(" " + n.name + " " + String.format(Locale.US, "%.3f", n.value));
         }
-        writer.println();
+        writer.write("\n");
     }
 
     /**
@@ -291,37 +291,30 @@ public class Tree {
      * @return
      */
     public int maxIndependentNodes() {
-        HashMap<Double, Integer> map = new HashMap<Double, Integer>();
-        return maxIndependentNodes(root, map);
+        int result[] = maxIndependentNodes(root);
+        return Math.max(result[0], result[1]);
     }
-
+    
     /**
      * Find the maximum number of independent nodes.
-     * Used recursion with memoization.
-     * If the current node is null, return 0.
-     * If the current node is in the map, return the value from the map.
-     * If the current node is the root of the subtree, add 1 to the maximum number of independent nodes and add the maximum number of independent nodes from the grandchildren.
-     * If the current node is not the root of the subtree, add the maximum number of independent nodes from the left and right subtrees.
+     * Used recursion to find the maximum number of independent nodes.
+     * The first element of the array is the maximum number of independent nodes if the current node is included.
+     * The second element of the array is the maximum number of independent nodes if the current node is not included.
      * @param node current node in the recursion
-     * @param map map with the node values as keys and the maximum number of independent nodes as values
-     * @return the maximum number of independent nodes
+     * @return an integer array, the first element is the maximum number of independent nodes if the root is included, the second element is the maximum number of independent nodes if the root is not included
      */
-    private int maxIndependentNodes(Node node, HashMap<Double, Integer> map) {
-        if (node == null) return 0;
-        if (map.containsKey(node.value)) return map.get(node.value);
+    private int[] maxIndependentNodes(Node node){
+        int[] result = new int[2];
+        if (node == null) return result;
 
-        int maxWithRoot = 1;
-        if (node.left != null) {
-            maxWithRoot += maxIndependentNodes(node.left.left, map) + maxIndependentNodes(node.left.right, map);
-        }
-        if (node.right != null) {
-            maxWithRoot += maxIndependentNodes(node.right.left, map) + maxIndependentNodes(node.right.right, map);
-        }
+        int[] left = maxIndependentNodes(node.left);
+        int[] right = maxIndependentNodes(node.right);
 
-        int maxWithoutRoot = maxIndependentNodes(node.left, map) + maxIndependentNodes(node.right, map);
+        result[0] = 1 + left[1] + right[1];
+        result[1] = Math.max(left[0], left[1]) + Math.max(right[0], right[1]);
 
-        map.put(node.value, Math.max(maxWithRoot, maxWithoutRoot));
-        return Math.max(maxWithRoot, maxWithoutRoot);
+        return result;
     }
 }
+
     

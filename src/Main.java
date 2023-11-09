@@ -1,5 +1,5 @@
 import java.io.File;
-import java.io.PrintWriter;
+import java.io.FileWriter;
 import java.util.Locale;
 import java.util.Scanner;
 
@@ -12,9 +12,10 @@ public class Main {
      * @param args Command line arguments (input file, output file)
      */
     public static void main(String[] args) throws Exception {
+        double start = System.currentTimeMillis();
         File inputFile = new File(args[0]);
         Scanner scanner = new Scanner(inputFile);
-        PrintWriter writer = new PrintWriter(args[1], "UTF-8");
+        FileWriter writer = new FileWriter(args[1]);
         String[] boss = scanner.nextLine().split(" ");
         Tree tree = new Tree(new Node(boss[0], Double.parseDouble(boss[1])), writer);
 
@@ -31,11 +32,11 @@ public class Main {
                     break;
                 case "INTEL_TARGET":
                     Node ancestor = tree.lowestCommonAncestor(Double.parseDouble(line[2]), Double.parseDouble(line[4]));
-                    writer.println("Target Analysis Result: " + ancestor.name + " " + String.format(Locale.US, "%.3f", ancestor.value));
+                    writer.write("Target Analysis Result: " + ancestor.name + " " + String.format(Locale.US, "%.3f", ancestor.value) + "\n");
                     break;
                 case "INTEL_DIVIDE":
                     int maxCount = tree.maxIndependentNodes();
-                    writer.println("Division Analysis Result: " + maxCount);
+                    writer.write("Division Analysis Result: " + maxCount + "\n");
                     break;
                 case "INTEL_RANK":
                     tree.nodesWithSameRank(Double.parseDouble(line[2]));
@@ -45,5 +46,7 @@ public class Main {
 
         scanner.close();
         writer.close();
+        double end = System.currentTimeMillis();
+        System.out.println("Time: " + (end - start) / 1000 + " seconds");
     }
 }
