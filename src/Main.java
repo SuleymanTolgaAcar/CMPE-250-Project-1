@@ -1,3 +1,10 @@
+/**
+ * CMPE 250 Project 1
+ * Süleyman Tolga Acar
+ * 2021400237
+ * @author Süleyman Tolga Acar
+ */
+
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Locale;
@@ -12,7 +19,6 @@ public class Main {
      * @param args Command line arguments (input file, output file)
      */
     public static void main(String[] args) throws Exception {
-        double start = System.currentTimeMillis();
         File inputFile = new File(args[0]);
         Scanner scanner = new Scanner(inputFile);
         FileWriter writer = new FileWriter(args[1]);
@@ -46,7 +52,5 @@ public class Main {
 
         scanner.close();
         writer.close();
-        double end = System.currentTimeMillis();
-        System.out.println("Time: " + (end - start) / 1000 + " seconds");
     }
 }
